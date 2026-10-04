@@ -1,0 +1,30 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: aegra
+      POSTGRES_PASSWORD: aegra
+      POSTGRES_DB: aegra
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aegra -d aegra"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  aegra:
+    image: upstreamyard/aegra:latest
+    restart: unless-stopped
+    ports:
+      - "2026:2026"
+    environment:
+      DATABASE_URL: postgresql://aegra:aegra@postgres:5432/aegra
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
