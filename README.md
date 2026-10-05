@@ -11,15 +11,29 @@ Multi-arch (`amd64`, `arm64`), signed container images for [Aegra](https://githu
 
 **Tags:** `latest`, `<major>.<minor>` (e.g. `0.10`), `<version>` (e.g. `0.10.8`, matching the [upstream releases](https://github.com/aegra/aegra/releases)). New upstream releases are built automatically within 24 hours.
 
+## At a glance
+
+| | |
+|---|---|
+| Port | `2026` |
+| Probes | liveness `GET /live`, readiness `GET /ready`, full health `GET /health` |
+| API docs | `GET /docs`, `GET /openapi.json` |
+| Requires | PostgreSQL (`DATABASE_URL`). Redis only for multiple replicas |
+| Runs as | non-root UID `10001` |
+| Migrations | automatic on startup, or `aegra db upgrade` |
+| Default auth | none (`AUTH_TYPE=noop`). Don't expose publicly as-is |
+
+**AI agents and coding assistants:** read [`AGENTS.md`](https://github.com/upstreamyard/aegra/blob/main/AGENTS.md) for deployment rules, and [`llms.txt`](https://github.com/upstreamyard/aegra/blob/main/llms.txt) for an index of all docs.
+
 ## Quick start
 
-Aegra needs PostgreSQL (with pgvector). Redis is optional and only needed when you run several replicas.
+Aegra needs PostgreSQL. pgvector is only needed for semantic store search. Redis is optional and only needed when you run several replicas.
 
 ```bash
 curl -O https://raw.githubusercontent.com/upstreamyard/aegra/main/docker-compose.yml
 export OPENAI_API_KEY=sk-...
 docker compose up -d
-curl http://localhost:2026/health
+curl http://localhost:2026/ready
 ```
 
 Or with plain `docker run`:
@@ -73,11 +87,13 @@ All of Aegra's settings are environment variables. See the [upstream `.env.examp
 
 ## Kubernetes
 
+A complete example (Secret, migration Job, Deployment with probes, Service) is in [`examples/kubernetes/aegra.yaml`](https://github.com/upstreamyard/aegra/blob/main/examples/kubernetes/aegra.yaml).
+
 For more than one replica:
 
 1. Run migrations once per release as a Job: `command: ["aegra", "db", "upgrade"]`.
 2. Set `RUN_MIGRATIONS_ON_STARTUP=false`, `REDIS_BROKER_ENABLED=true` and `REDIS_URL` on the Deployment.
-3. Use `/health` for both readiness and liveness probes.
+3. Use `/live` for liveness and startup probes and `/ready` for readiness. Avoid `/health` for liveness: it fails when the database is down, and Kubernetes would then restart pods that are fine.
 
 The container runs as non-root UID `10001` and is compatible with `runAsNonRoot: true`.
 
@@ -95,7 +111,7 @@ docker buildx imagetools inspect upstreamyard/aegra:latest --format '{{ json .SB
 
 ## How it's built
 
-[`.github/workflows/build.yml`](.github/workflows/build.yml) checks out the upstream release tag and builds [`Dockerfile`](Dockerfile). Before publishing, it starts the image against a real PostgreSQL and waits for `/health` to pass. Everything is public and reproducible.
+[`.github/workflows/build.yml`](https://github.com/upstreamyard/aegra/blob/main/.github/workflows/build.yml) checks out the upstream release tag and builds [`Dockerfile`](https://github.com/upstreamyard/aegra/blob/main/Dockerfile). Before publishing, it starts the image against a real PostgreSQL and waits for `/health` to pass. Everything is public and reproducible.
 
 Differences from upstream's `deployments/docker/Dockerfile`: the `aegra` CLI is installed (so the default `aegra serve` command works), `tini` runs as PID 1, there's a built-in `HEALTHCHECK`, the UID is fixed, and builds are multi-arch.
 

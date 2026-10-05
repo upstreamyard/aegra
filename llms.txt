@@ -1,0 +1,26 @@
+# upstreamyard/aegra
+
+> Multi-arch (amd64, arm64), cosign-signed container image for Aegra, the open-source self-hosted alternative to LangGraph Platform. Community-maintained by upstreamyard; not an official Aegra image. Pull `upstreamyard/aegra:<version>` or `ghcr.io/upstreamyard/aegra:<version>`. Listens on port 2026 and needs PostgreSQL (`DATABASE_URL`). Redis is needed only for multiple replicas.
+
+Key facts: liveness `GET /live`, readiness `GET /ready`, component health `GET /health`, OpenAPI at `/openapi.json`, non-root UID 10001, migrations via `aegra db upgrade`. The default `AUTH_TYPE=noop` has no authentication.
+
+## Docs
+
+- [README](https://raw.githubusercontent.com/upstreamyard/aegra/main/README.md): quick start, configuration, Kubernetes notes, image verification
+- [AGENTS.md](https://raw.githubusercontent.com/upstreamyard/aegra/main/AGENTS.md): image facts table, deployment rules, repository conventions
+
+## Examples
+
+- [docker-compose.yml](https://raw.githubusercontent.com/upstreamyard/aegra/main/docker-compose.yml): Aegra and PostgreSQL in a single Compose file
+- [Kubernetes manifests](https://raw.githubusercontent.com/upstreamyard/aegra/main/examples/kubernetes/aegra.yaml): Secret, migration Job, Deployment with probes, Service
+
+## Upstream
+
+- [Aegra repository](https://github.com/aegra/aegra): source, issues, releases
+- [Aegra docs index (llms.txt)](https://raw.githubusercontent.com/aegra/aegra/main/docs/llms.txt): upstream documentation for building and calling agents
+- [Aegra environment variables](https://raw.githubusercontent.com/aegra/aegra/main/.env.example): full configuration reference
+
+## Optional
+
+- [Build workflow](https://raw.githubusercontent.com/upstreamyard/aegra/main/.github/workflows/build.yml): how images are built, tested, signed and published
+- [Dockerfile](https://raw.githubusercontent.com/upstreamyard/aegra/main/Dockerfile)
