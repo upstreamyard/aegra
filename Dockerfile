@@ -72,7 +72,12 @@ LABEL org.opencontainers.image.title="aegra" \
       org.opencontainers.image.licenses="Apache-2.0" \
       org.opencontainers.image.vendor="upstreamyard" \
       org.opencontainers.image.url="https://github.com/upstreamyard/aegra" \
-      org.opencontainers.image.documentation="https://github.com/upstreamyard/aegra#readme"
+      org.opencontainers.image.documentation="https://github.com/upstreamyard/aegra#readme" \
+      io.upstreamyard.port="2026" \
+      io.upstreamyard.probe.liveness="/live" \
+      io.upstreamyard.probe.readiness="/ready" \
+      io.upstreamyard.requires="postgresql" \
+      io.upstreamyard.agents-doc="https://raw.githubusercontent.com/upstreamyard/aegra/main/AGENTS.md"
 
 EXPOSE 2026
 

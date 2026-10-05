@@ -1,0 +1,113 @@
+# Aegra on Kubernetes with the upstreamyard/aegra image.
+#
+# Assumes PostgreSQL and Redis already exist (managed service, operator or Helm chart).
+# PostgreSQL must include the pgvector extension, e.g. run the pgvector/pgvector:pg18 image.
+# Apply with:  kubectl apply -n aegra -f aegra.yaml
+#
+# Upgrade procedure: bump the image tag in BOTH the Job and the Deployment, delete the old
+# Job (kubectl delete job aegra-migrate), then apply again. The Job migrates before pods roll.
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: aegra
+type: Opaque
+stringData:
+  # URL-encode special characters in the password (@ -> %40).
+  DATABASE_URL: postgresql://aegra:CHANGE_ME@postgres:5432/aegra
+  REDIS_URL: redis://redis:6379/0
+  OPENAI_API_KEY: CHANGE_ME
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: aegra-migrate
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+      containers:
+        - name: migrate
+          image: upstreamyard/aegra:0.10.8
+          command: ["aegra", "db", "upgrade"]
+          envFrom:
+            - secretRef:
+                name: aegra
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aegra
+  labels:
+    app.kubernetes.io/name: aegra
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: aegra
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: aegra
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+      containers:
+        - name: aegra
+          image: upstreamyard/aegra:0.10.8
+          ports:
+            - name: http
+              containerPort: 2026
+          envFrom:
+            - secretRef:
+                name: aegra
+          env:
+            - name: RUN_MIGRATIONS_ON_STARTUP
+              value: "false"   # the Job above migrates
+            - name: REDIS_BROKER_ENABLED
+              value: "true"    # required for more than one replica
+            - name: ENABLE_PROMETHEUS_METRICS
+              value: "true"
+          startupProbe:
+            httpGet: { path: /live, port: http }
+            periodSeconds: 2
+            failureThreshold: 30
+          livenessProbe:
+            httpGet: { path: /live, port: http }
+            periodSeconds: 10
+          readinessProbe:
+            httpGet: { path: /ready, port: http }
+            periodSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits: { memory: 1Gi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aegra
+  labels:
+    app.kubernetes.io/name: aegra
+spec:
+  selector:
+    app.kubernetes.io/name: aegra
+  ports:
+    - name: http
+      port: 2026
+      targetPort: http
