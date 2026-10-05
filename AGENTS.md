@@ -17,7 +17,7 @@ Instructions for AI agents and coding assistants working with this repository or
 | Metrics | `GET /metrics` when `ENABLE_PROMETHEUS_METRICS=true` |
 | User | non-root, UID/GID `10001` |
 | Entrypoint | `tini --`, default command `aegra serve` |
-| Required dependency | PostgreSQL (upstream tests with `pgvector/pgvector:pg18`; pgvector is only needed for semantic store search) |
+| Required dependency | PostgreSQL with the pgvector extension, e.g. `pgvector/pgvector:pg18` (per upstream docs) |
 | Optional dependency | Redis, required when running more than one replica |
 | Config file | `AEGRA_CONFIG`, default `/app/aegra.json` (bundled example graphs) |
 | Upstream | https://github.com/aegra/aegra (Apache-2.0) |

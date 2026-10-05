@@ -18,7 +18,7 @@ Multi-arch (`amd64`, `arm64`), signed container images for [Aegra](https://githu
 | Port | `2026` |
 | Probes | liveness `GET /live`, readiness `GET /ready`, full health `GET /health` |
 | API docs | `GET /docs`, `GET /openapi.json` |
-| Requires | PostgreSQL (`DATABASE_URL`). Redis only for multiple replicas |
+| Requires | PostgreSQL with the pgvector extension, e.g. `pgvector/pgvector:pg18` (`DATABASE_URL`). Redis only for multiple replicas |
 | Runs as | non-root UID `10001` |
 | Migrations | automatic on startup, or `aegra db upgrade` |
 | Default auth | none (`AUTH_TYPE=noop`). Don't expose publicly as-is |
@@ -27,7 +27,7 @@ Multi-arch (`amd64`, `arm64`), signed container images for [Aegra](https://githu
 
 ## Quick start
 
-Aegra needs PostgreSQL. pgvector is only needed for semantic store search. Redis is optional and only needed when you run several replicas.
+Aegra needs PostgreSQL with the [pgvector](https://github.com/pgvector/pgvector) extension; the `pgvector/pgvector:pg18` image is Postgres 18 with pgvector included ([upstream requirement](https://github.com/aegra/aegra/blob/main/docs/installation.mdx)). Redis is optional and only needed when you run several replicas.
 
 ```bash
 curl -O https://raw.githubusercontent.com/upstreamyard/aegra/main/docker-compose.yml

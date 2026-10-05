@@ -1,6 +1,6 @@
 # upstreamyard/aegra
 
-> Multi-arch (amd64, arm64), cosign-signed container image for Aegra, the open-source self-hosted alternative to LangGraph Platform. Community-maintained by upstreamyard; not an official Aegra image. Pull `upstreamyard/aegra:<version>` or `ghcr.io/upstreamyard/aegra:<version>`. Listens on port 2026 and needs PostgreSQL (`DATABASE_URL`). Redis is needed only for multiple replicas.
+> Multi-arch (amd64, arm64), cosign-signed container image for Aegra, the open-source self-hosted alternative to LangGraph Platform. Community-maintained by upstreamyard; not an official Aegra image. Pull `upstreamyard/aegra:<version>` or `ghcr.io/upstreamyard/aegra:<version>`. Listens on port 2026 and needs PostgreSQL with the pgvector extension, e.g. `pgvector/pgvector:pg18` (`DATABASE_URL`). Redis is needed only for multiple replicas.
 
 Key facts: liveness `GET /live`, readiness `GET /ready`, component health `GET /health`, OpenAPI at `/openapi.json`, non-root UID 10001, migrations via `aegra db upgrade`. The default `AUTH_TYPE=noop` has no authentication.
 

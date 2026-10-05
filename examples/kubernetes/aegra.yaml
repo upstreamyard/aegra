@@ -1,6 +1,7 @@
 # Aegra on Kubernetes with the upstreamyard/aegra image.
 #
 # Assumes PostgreSQL and Redis already exist (managed service, operator or Helm chart).
+# PostgreSQL must include the pgvector extension, e.g. run the pgvector/pgvector:pg18 image.
 # Apply with:  kubectl apply -n aegra -f aegra.yaml
 #
 # Upgrade procedure: bump the image tag in BOTH the Job and the Deployment, delete the old
