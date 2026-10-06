@@ -30,7 +30,7 @@ Rules that avoid the common failures:
 - **LLM keys:** the bundled example graphs use OpenAI. Set `OPENAI_API_KEY` or replace `AEGRA_CONFIG` with your own graphs.
 - **Single replica:** nothing else needed. Migrations run automatically on startup.
 - **More than one replica:** set `REDIS_BROKER_ENABLED=true`, `REDIS_URL=redis://HOST:6379/0` and `RUN_MIGRATIONS_ON_STARTUP=false`, then run `aegra db upgrade` once per release (Kubernetes Job or init container, same image).
-- **Auth:** the default `AUTH_TYPE=noop` accepts every request. Never expose it publicly without putting auth in front or configuring `AUTH_TYPE=custom`.
+- **Auth:** the bundled example config has no auth handler, so every request is accepted. Auth is on only when the served `aegra.json` has an `"auth"` entry (see README, "Running your own agents"). In Aegra 0.10.8 `AUTH_TYPE` has no effect. Never expose the image publicly without an auth handler or auth in front.
 - **Own graphs:** mount or copy a directory with `aegra.json` and your graph code **under `/app`** (e.g. `/app/agents`) and set `AEGRA_CONFIG=/app/agents/aegra.json`. `aegra serve` ignores an `AEGRA_CONFIG` outside its working directory `/app` and silently serves the bundled examples. Extra Python packages need a derived image (see README).
 
 Ready-to-use manifests:

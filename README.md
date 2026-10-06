@@ -21,7 +21,7 @@ Multi-arch (`amd64`, `arm64`), signed container images for [Aegra](https://githu
 | Requires | PostgreSQL with the pgvector extension, e.g. `pgvector/pgvector:pg18` (`DATABASE_URL`). Redis only for multiple replicas |
 | Runs as | non-root UID `10001` |
 | Migrations | automatic on startup, or `aegra db upgrade` |
-| Default auth | none (`AUTH_TYPE=noop`). Don't expose publicly as-is |
+| Default auth | none: the bundled example agents accept every request. Add an auth handler in your `aegra.json` (see below) |
 
 **AI agents and coding assistants:** read [`AGENTS.md`](https://github.com/upstreamyard/aegra/blob/main/AGENTS.md) for deployment rules, and [`llms.txt`](https://github.com/upstreamyard/aegra/blob/main/llms.txt) for an index of all docs.
 
@@ -126,7 +126,6 @@ All of Aegra's settings are environment variables. See the [upstream `.env.examp
 | `DATABASE_URL` | – | `postgresql://user:pass@host:5432/db` (or set `POSTGRES_HOST`, `POSTGRES_USER`, …) |
 | `AEGRA_CONFIG` | `/app/aegra.json` | Path to your graph config |
 | `PORT` / `HOST` | `2026` / `0.0.0.0` | |
-| `AUTH_TYPE` | `noop` | Set to `custom` for real auth in production |
 | `RUN_MIGRATIONS_ON_STARTUP` | `true` | Set `false` for multi-replica deployments and run `aegra db upgrade` as a one-off job |
 | `REDIS_BROKER_ENABLED` / `REDIS_URL` | `false` | Needed for multiple replicas (shared streaming and job queue) |
 | `ENV_MODE` | `PRODUCTION` | JSON logs |
