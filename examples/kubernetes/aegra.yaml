@@ -4,8 +4,13 @@
 # PostgreSQL must include the pgvector extension, e.g. run the pgvector/pgvector:pg18 image.
 # Apply with:  kubectl apply -n aegra -f aegra.yaml
 #
+# Prefer the Helm chart (https://github.com/upstreamyard/helm-charts), which guarantees that
+# migrations finish before pods start. These plain manifests do NOT guarantee that: kubectl
+# creates the Job and the Deployment at the same time, so pods can start serving (and requests
+# fail) before the Job is done.
+#
 # Upgrade procedure: bump the image tag in BOTH the Job and the Deployment, delete the old
-# Job (kubectl delete job aegra-migrate), then apply again. The Job migrates before pods roll.
+# Job (kubectl delete job aegra-migrate), then apply again.
 ---
 apiVersion: v1
 kind: Secret

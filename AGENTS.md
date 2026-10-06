@@ -36,7 +36,8 @@ Rules that avoid the common failures:
 Ready-to-use manifests:
 
 - Docker Compose: [`docker-compose.yml`](docker-compose.yml)
-- Kubernetes: [`examples/kubernetes/aegra.yaml`](examples/kubernetes/aegra.yaml) (Secret, migration Job, Deployment, Service)
+- Kubernetes (recommended): Helm chart `upstreamyard/aegra` from `https://upstreamyard.github.io/helm-charts` (also `oci://ghcr.io/upstreamyard/charts/aegra`), documented in https://github.com/upstreamyard/helm-charts/tree/main/charts/aegra
+- Kubernetes without Helm: [`examples/kubernetes/aegra.yaml`](examples/kubernetes/aegra.yaml) (Secret, migration Job, Deployment, Service)
 
 Verify a deployment:
 

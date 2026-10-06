@@ -87,9 +87,16 @@ All of Aegra's settings are environment variables. See the [upstream `.env.examp
 
 ## Kubernetes
 
-A complete example (Secret, migration Job, Deployment with probes, Service) is in [`examples/kubernetes/aegra.yaml`](https://github.com/upstreamyard/aegra/blob/main/examples/kubernetes/aegra.yaml).
+The recommended way is the Helm chart ([`upstreamyard/helm-charts`](https://github.com/upstreamyard/helm-charts/tree/main/charts/aegra)). It runs migrations as a Helm pre-install/pre-upgrade Job before pods start, which is the approach Aegra's docs recommend:
 
-For more than one replica:
+```bash
+helm repo add upstreamyard https://upstreamyard.github.io/helm-charts
+helm install aegra upstreamyard/aegra --set database.url='postgresql://user:password@host:5432/aegra'
+```
+
+Without Helm, [`examples/kubernetes/aegra.yaml`](https://github.com/upstreamyard/aegra/blob/main/examples/kubernetes/aegra.yaml) is a plain-manifest starting point (Secret, migration Job, Deployment with probes, Service).
+
+For more than one replica (the chart does all of this for you):
 
 1. Run migrations once per release as a Job: `command: ["aegra", "db", "upgrade"]`.
 2. Set `RUN_MIGRATIONS_ON_STARTUP=false`, `REDIS_BROKER_ENABLED=true` and `REDIS_URL` on the Deployment.

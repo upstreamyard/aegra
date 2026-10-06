@@ -12,7 +12,8 @@ Key facts: liveness `GET /live`, readiness `GET /ready`, component health `GET /
 ## Examples
 
 - [docker-compose.yml](https://raw.githubusercontent.com/upstreamyard/aegra/main/docker-compose.yml): Aegra and PostgreSQL in a single Compose file
-- [Kubernetes manifests](https://raw.githubusercontent.com/upstreamyard/aegra/main/examples/kubernetes/aegra.yaml): Secret, migration Job, Deployment with probes, Service
+- [Helm chart](https://raw.githubusercontent.com/upstreamyard/helm-charts/main/charts/aegra/README.md): recommended for Kubernetes; `helm repo add upstreamyard https://upstreamyard.github.io/helm-charts`
+- [Kubernetes manifests](https://raw.githubusercontent.com/upstreamyard/aegra/main/examples/kubernetes/aegra.yaml): plain manifests without Helm: Secret, migration Job, Deployment with probes, Service
 
 ## Upstream
 
