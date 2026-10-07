@@ -21,7 +21,7 @@ Multi-arch (`amd64`, `arm64`), signed container images for [Aegra](https://githu
 | Requires | PostgreSQL with the pgvector extension, e.g. `pgvector/pgvector:pg18` (`DATABASE_URL`). Redis only for multiple replicas |
 | Runs as | non-root UID `10001` |
 | Migrations | automatic on startup, or `aegra db upgrade` |
-| Default auth | none (`AUTH_TYPE=noop`). Don't expose publicly as-is |
+| Default auth | none: the bundled example agents accept every request. Add an auth handler in your `aegra.json` (see below) |
 
 **AI agents and coding assistants:** read [`AGENTS.md`](https://github.com/upstreamyard/aegra/blob/main/AGENTS.md) for deployment rules, and [`llms.txt`](https://github.com/upstreamyard/aegra/blob/main/llms.txt) for an index of all docs.
 
@@ -49,25 +49,72 @@ Point any LangGraph SDK client at `http://localhost:2026`.
 
 ## Running your own agents
 
-The image ships with Aegra's example graphs and `aegra.json` at `/app`. To serve your own graphs, mount your config and code and set `AEGRA_CONFIG`:
+Aegra runs **your** agent code. The image provides the server and its dependencies; you add a folder with your files:
+
+```
+my-agents/
+├── aegra.json      # which graphs to serve (and optionally which auth handler)
+├── graph.py        # your LangGraph graph(s)
+└── my_auth.py      # optional: authentication handler
+```
+
+```json
+{
+  "graphs": { "agent": "./graph.py:graph" },
+  "auth": { "path": "./my_auth.py:auth" }
+}
+```
+
+Paths in `aegra.json` are relative to the folder containing `aegra.json`.
+
+> **Put your folder under `/app`** (e.g. `/app/agents`) and point `AEGRA_CONFIG` at it. `aegra serve` ignores an `AEGRA_CONFIG` outside its working directory `/app` and silently serves the bundled example agents instead. See Aegra's docs for [writing graphs](https://github.com/aegra/aegra/tree/main/docs) and the [auth handler](https://github.com/aegra/aegra/blob/main/docs/guides/authentication.mdx).
+
+### Option 1: mount your files (no build)
+
+Works when your code only uses packages that are already in the image. This is best for development, since you can edit files and restart without rebuilding.
 
 ```bash
 docker run -d -p 2026:2026 \
   -e DATABASE_URL=postgresql://user:password@your-postgres:5432/aegra \
-  -e AEGRA_CONFIG=/agents/aegra.json \
-  -v ./my-agents:/agents:ro \
-  upstreamyard/aegra:latest
+  -e AEGRA_CONFIG=/app/agents/aegra.json \
+  -v ./my-agents:/app/agents:ro \
+  upstreamyard/aegra:0.10
 ```
 
-If your graphs need extra Python packages, build a thin image on top:
+With Docker Compose, add the same `AEGRA_CONFIG` variable and a `volumes: ["./my-agents:/app/agents:ro"]` entry to the `aegra` service. The Helm chart can't mount files yet, so on Kubernetes use option 2.
+
+### Option 2: build your own image on top (recommended for production)
+
+Needed when your code uses extra Python packages, e.g. for Salesforce or Microsoft Teams, and the usual way to ship agents to Kubernetes:
 
 ```dockerfile
 FROM upstreamyard/aegra:0.10
 USER root
-RUN pip install --no-cache-dir langchain-anthropic
+RUN pip install --no-cache-dir simple-salesforce msgraph-sdk
 USER 10001:10001
-COPY my-agents/ /agents/
-ENV AEGRA_CONFIG=/agents/aegra.json
+COPY my-agents/ /app/agents/
+ENV AEGRA_CONFIG=/app/agents/aegra.json
+```
+
+```bash
+docker build -t registry.example.com/my-agents:1.0 .
+docker push registry.example.com/my-agents:1.0
+```
+
+Pinning `0.10` gets you Aegra's patch releases (and our image fixes) whenever you rebuild. With the [Helm chart](https://github.com/upstreamyard/helm-charts/tree/main/charts/aegra), deploy it with `--set image.repository=registry.example.com/my-agents --set image.tag=1.0`.
+
+### Credentials and settings
+
+Never put API keys or passwords into the image. Pass them as environment variables when the container starts, and read them in your code with `os.environ["SALESFORCE_TOKEN"]`:
+
+- `docker run`: `-e SALESFORCE_TOKEN=...` or `--env-file .env`
+- Docker Compose: `environment:` or `env_file:`
+- Helm chart: `extraEnv` for plain values, `extraEnvFrom` for a Kubernetes Secret:
+
+```yaml
+extraEnvFrom:
+  - secretRef:
+      name: salesforce-credentials   # kubectl create secret generic salesforce-credentials --from-literal=SALESFORCE_TOKEN=...
 ```
 
 ## Configuration
@@ -79,7 +126,6 @@ All of Aegra's settings are environment variables. See the [upstream `.env.examp
 | `DATABASE_URL` | – | `postgresql://user:pass@host:5432/db` (or set `POSTGRES_HOST`, `POSTGRES_USER`, …) |
 | `AEGRA_CONFIG` | `/app/aegra.json` | Path to your graph config |
 | `PORT` / `HOST` | `2026` / `0.0.0.0` | |
-| `AUTH_TYPE` | `noop` | Set to `custom` for real auth in production |
 | `RUN_MIGRATIONS_ON_STARTUP` | `true` | Set `false` for multi-replica deployments and run `aegra db upgrade` as a one-off job |
 | `REDIS_BROKER_ENABLED` / `REDIS_URL` | `false` | Needed for multiple replicas (shared streaming and job queue) |
 | `ENV_MODE` | `PRODUCTION` | JSON logs |
@@ -87,9 +133,16 @@ All of Aegra's settings are environment variables. See the [upstream `.env.examp
 
 ## Kubernetes
 
-A complete example (Secret, migration Job, Deployment with probes, Service) is in [`examples/kubernetes/aegra.yaml`](https://github.com/upstreamyard/aegra/blob/main/examples/kubernetes/aegra.yaml).
+The recommended way is the Helm chart ([`upstreamyard/helm-charts`](https://github.com/upstreamyard/helm-charts/tree/main/charts/aegra)). It runs migrations as a Helm pre-install/pre-upgrade Job before pods start, which is the approach Aegra's docs recommend:
 
-For more than one replica:
+```bash
+helm repo add upstreamyard https://upstreamyard.github.io/helm-charts
+helm install aegra upstreamyard/aegra --set database.url='postgresql://user:password@host:5432/aegra'
+```
+
+Without Helm, [`examples/kubernetes/aegra.yaml`](https://github.com/upstreamyard/aegra/blob/main/examples/kubernetes/aegra.yaml) is a plain-manifest starting point (Secret, migration Job, Deployment with probes, Service).
+
+For more than one replica (the chart does all of this for you):
 
 1. Run migrations once per release as a Job: `command: ["aegra", "db", "upgrade"]`.
 2. Set `RUN_MIGRATIONS_ON_STARTUP=false`, `REDIS_BROKER_ENABLED=true` and `REDIS_URL` on the Deployment.
