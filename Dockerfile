@@ -1,5 +1,5 @@
 # Container image for Aegra (https://github.com/aegra/aegra)
-# Maintained by upstreamyard. Builds the upstream source checked out into ./upstream
+# Maintained by upstreamyard. Builds the Aegra source code, checked out into ./upstream
 # at the release tag selected by CI.
 
 ARG PY_VERSION=3.12
@@ -29,10 +29,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /build
 COPY upstream/ ./
 
-# Third-party dependencies from the workspace lockfile (same set as upstream's
+# Third-party dependencies from the workspace lockfile (same set as the Aegra project's
 # own Dockerfile, which includes the deps the bundled example agents need),
 # then the two workspace packages: the API server and the `aegra` CLI.
-# Upstream's image omits the CLI, so its default `aegra serve` command fails.
+# The Aegra project's image omits the CLI, so its default `aegra serve` command fails.
 RUN uv export --frozen --all-packages --no-emit-workspace --format=requirements-txt > requirements.txt && \
     uv pip install --system --compile-bytecode -r requirements.txt && \
     uv pip install --system --compile-bytecode --no-deps ./libs/aegra-api ./libs/aegra-cli

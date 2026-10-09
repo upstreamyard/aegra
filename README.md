@@ -9,7 +9,7 @@ Multi-arch (`amd64`, `arm64`), signed container images for [Aegra](https://githu
 | Docker Hub | `upstreamyard/aegra` |
 | GitHub Container Registry | `ghcr.io/upstreamyard/aegra` |
 
-**Tags:** `latest`, `<major>.<minor>` (e.g. `0.10`), `<version>` (e.g. `0.10.8`, matching the [upstream releases](https://github.com/aegra/aegra/releases)). New upstream releases are built automatically within 24 hours.
+**Tags:** `latest`, `<major>.<minor>` (e.g. `0.10`), `<version>` (e.g. `0.10.8`, matching the [Aegra releases](https://github.com/aegra/aegra/releases)). New Aegra releases are built automatically within 24 hours.
 
 ## At a glance
 
@@ -27,7 +27,7 @@ Multi-arch (`amd64`, `arm64`), signed container images for [Aegra](https://githu
 
 ## Quick start
 
-Aegra needs PostgreSQL with the [pgvector](https://github.com/pgvector/pgvector) extension; the `pgvector/pgvector:pg18` image is Postgres 18 with pgvector included ([upstream requirement](https://github.com/aegra/aegra/blob/main/docs/installation.mdx)). Redis is optional and only needed when you run several replicas.
+Aegra needs PostgreSQL with the [pgvector](https://github.com/pgvector/pgvector) extension; the `pgvector/pgvector:pg18` image is Postgres 18 with pgvector included ([Aegra requirement](https://github.com/aegra/aegra/blob/main/docs/installation.mdx)). Redis is optional and only needed when you run several replicas.
 
 ```bash
 curl -O https://raw.githubusercontent.com/upstreamyard/aegra/main/docker-compose.yml
@@ -119,7 +119,7 @@ extraEnvFrom:
 
 ## Configuration
 
-All of Aegra's settings are environment variables. See the [upstream `.env.example`](https://github.com/aegra/aegra/blob/main/.env.example) for the full list. The most important ones:
+All of Aegra's settings are environment variables. See the [Aegra project's `.env.example`](https://github.com/aegra/aegra/blob/main/.env.example) for the full list. The most important ones:
 
 | Variable | Default in image | Notes |
 |---|---|---|
@@ -164,10 +164,10 @@ docker buildx imagetools inspect upstreamyard/aegra:latest --format '{{ json .SB
 
 ## How it's built
 
-[`.github/workflows/build.yml`](https://github.com/upstreamyard/aegra/blob/main/.github/workflows/build.yml) checks out the upstream release tag and builds [`Dockerfile`](https://github.com/upstreamyard/aegra/blob/main/Dockerfile). Before publishing, it starts the image against a real PostgreSQL and waits for `/health` to pass. Everything is public and reproducible.
+[`.github/workflows/build.yml`](https://github.com/upstreamyard/aegra/blob/main/.github/workflows/build.yml) checks out the Aegra release tag and builds [`Dockerfile`](https://github.com/upstreamyard/aegra/blob/main/Dockerfile). Before publishing, it starts the image against a real PostgreSQL and waits for `/health` to pass. Everything is public and reproducible.
 
-Differences from upstream's `deployments/docker/Dockerfile`: the `aegra` CLI is installed (so the default `aegra serve` command works), `tini` runs as PID 1, there's a built-in `HEALTHCHECK`, the UID is fixed, and builds are multi-arch.
+Differences from the Aegra project's own `deployments/docker/Dockerfile`: the `aegra` CLI is installed (so the default `aegra serve` command works), `tini` runs as PID 1, there's a built-in `HEALTHCHECK`, the UID is fixed, and builds are multi-arch.
 
 ## Support
 
-Issues with the image: [open an issue here](https://github.com/upstreamyard/aegra/issues). Issues with Aegra itself: [upstream](https://github.com/aegra/aegra/issues).
+Issues with the image: [open an issue here](https://github.com/upstreamyard/aegra/issues). Issues with Aegra itself: [aegra/aegra](https://github.com/aegra/aegra/issues).

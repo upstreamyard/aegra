@@ -15,10 +15,10 @@ Key facts: liveness `GET /live`, readiness `GET /ready`, component health `GET /
 - [Helm chart](https://raw.githubusercontent.com/upstreamyard/helm-charts/main/charts/aegra/README.md): recommended for Kubernetes; `helm repo add upstreamyard https://upstreamyard.github.io/helm-charts`
 - [Kubernetes manifests](https://raw.githubusercontent.com/upstreamyard/aegra/main/examples/kubernetes/aegra.yaml): plain manifests without Helm: Secret, migration Job, Deployment with probes, Service
 
-## Upstream
+## Aegra project
 
 - [Aegra repository](https://github.com/aegra/aegra): source, issues, releases
-- [Aegra docs index (llms.txt)](https://raw.githubusercontent.com/aegra/aegra/main/docs/llms.txt): upstream documentation for building and calling agents
+- [Aegra docs index (llms.txt)](https://raw.githubusercontent.com/aegra/aegra/main/docs/llms.txt): Aegra documentation for building and calling agents
 - [Aegra environment variables](https://raw.githubusercontent.com/aegra/aegra/main/.env.example): full configuration reference
 
 ## Optional
