@@ -1,3 +1,5 @@
+<img src="https://upstreamyard.github.io/helm-charts/logo.png" alt="upstreamyard logo" width="120" align="right">
+
 # Aegra container image
 
 Multi-arch (`amd64`, `arm64`), signed container images for [Aegra](https://github.com/aegra/aegra), the open-source, self-hosted alternative to LangGraph Platform.
