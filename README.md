@@ -2,6 +2,8 @@
 
 # Aegra container image
 
+> **Support:** For help with setup, production issues or custom changes, email [upstreamyard@proton.me](mailto:upstreamyard@proton.me).
+
 Multi-arch (`amd64`, `arm64`), signed container images for [Aegra](https://github.com/aegra/aegra), the open-source, self-hosted alternative to LangGraph Platform.
 
 > Community-maintained by **upstreamyard**. This is not an official Aegra image. Aegra is © its authors and licensed under Apache-2.0 (license text in `/licenses/aegra/LICENSE` inside the image).
